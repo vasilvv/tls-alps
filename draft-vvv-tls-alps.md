@@ -143,8 +143,8 @@ exchange is performed in three steps:
 
                                                        ServerHello
                                              {EncryptedExtensions}
-                                                          + {alpn}
-                                                          + {alps}
+                                                            + alpn
+                                                            + alps
                                                                ...
                                  <--------              {Finished}
 
@@ -226,7 +226,7 @@ carried over from the previous connection.
 
 IANA will update the "TLS ExtensionType Values" registry to include
 `application_settings` with the value of TBD; the list of messages in which
-this extension may appear is `CH, SH`.
+this extension may appear is `CH, EE`.
 
 IANA will also update the "TLS HandshakeType" registry to include
 `client_application_settings` message with value TBD, and "DTLS-OK" set to "Y".
