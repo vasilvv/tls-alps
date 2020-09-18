@@ -110,7 +110,7 @@ support, and the server MUST NOT reply with ALPS unless it is also negotiating
 ALPN.  The ALPS payload is protocol-dependent, and as such it MUST be specified
 with respect to a selected ALPN.
 
-# Wire protocol
+# Wire Protocol
 
 ALPS is only supported in TLS version 1.3 or later, as the earlier versions do
 not provide any confidentiality protections for the handshake data.  The
@@ -119,7 +119,7 @@ exchange is performed in three steps:
 1. The client sends an extension in ClientHello that enumerates all ALPN values
    for which ALPS is supported.
 1. The server sends an encrypted extension containing the server settings.
-1. The client sends a new handshake message containing the client settings.
+1. The client sends an encrypted extension containing the client settings.
 
 ~~~
        Client                                               Server
@@ -135,7 +135,8 @@ exchange is performed in three steps:
                                                                ...
                                  <--------              {Finished}
 
-       {ClientApplicationSettings}
+       {EncryptedExtensions}
+       + alps
        {Certificate*}
        {CertificateVerify*}
        {Finished}                -------->
@@ -151,9 +152,9 @@ exchange is performed in three steps:
 ~~~
 {: #alps-full title="ALPS exchange in a full TLS handshake"}
 
-A TLS client can enable ALPS by specifying an `application_settings` extension.
-The value of the `extension_data` field for the ALPS extension SHALL be a
-ApplicationSettingsSupport struct:
+A TLS client can enable ALPS by specifying an `application_settings` extension
+in the ClientHello message. The value of the `extension_data` field for this
+extension SHALL be a ApplicationSettingsSupport struct:
 
         struct {
             ProtocolName supported_protocols<2..2^16-1>;
@@ -165,34 +166,55 @@ for the situations when the client offers multiple ALPN values but only supports
 ALPS in some of them.
 
 If the server chooses an ALPN value for which the client has offered ALPS
-support, the server MAY send an `application_settings` extension in the
-EncryptedExtensions.  The value of the `extension_data` field in that case SHALL
-be an opaque blob containing the server settings as specified by the application
-protocol.
+support, the server MAY negotiate ALPS by sending an `application_settings`
+extension in its EncryptedExtensions message.  The value of the `extension_data`
+field in that case SHALL be an opaque blob containing the server settings as
+specified by the application protocol.
 
 If the client receives an EncryptedExtensions message containing an
-`application_settings` extension from the server, after receiving server's
-Finished message it MUST send a ClientApplicationSettings handshake message
-before sending the Finished message:
+`application_settings` extension from the server, it MUST send an
+EncryptedExtensions message (see {{encrypted-extensions}}) containing an
+`application_extensions` extension. The value of the `extension_data` in this
+extension SHALL be an opaque blob containing the client settings as specified by
+the application protocol. A server which negotiates ALPS MUST abort the
+handshake with a `missing_extension` alert if the client's EncryptedExtensions
+is missing this extension.
 
-        enum {
-            client_application_settings(TBD), (255)
-        } HandshakeType;
+## Client Encrypted Extensions {#encrypted-extensions}
 
-        struct {
-            opaque application_settings<0..2^16-1>;
-        } ClientApplicationSettings;
+This specification introduces the client EncryptedExtensions message. The
+format and HandshakeType code point match the server EncryptedExtensions
+message. When sent, it is encrypted with handshake traffic keys and sent by the
+client after receiving the server Finished message and before the client sends
+the Certificate, CertificateVerify (if any), and Finished messages. It SHALL be
+appended to the Client Handshake Context, as defined Section 4.4 of
+{{!RFC8446}}. It additionally SHALL be inserted after the server Finished in the
+Post-Handshake Handshake Context.
 
-The value of the `application_settings` field SHALL be an opaque blob containing
-the client settings as specified by the application protocol.  If the client is
-providing a client certificate, the ClientApplicationSettings message MUST
-precede the Certificate message sent by the client.
+The client MUST send the EncryptedExtensions message if any extension sent in
+the server EncryptedExtension message contains the CEE token in the TLS 1.3
+column of the TLS ExtensionType Values registry. Otherwise, the client MUST NOT
+send the message. The server MUST abort the handshake with a
+`unexpected_message` alert if the message was sent or omitted incorrectly.
 
-If the ClientApplicationSettings message is sent or received during the
-handshake, it SHALL be appended to the end of client's Handshake Context
-context as defined in Section 4.4 of {{!RFC8446}}.  In addition, for
-Post-Handshake Handshake Context, it SHALL be appended after the client
-Finished message.
+The client MAY send an extension in the client EncryptedExtension message if
+that extension's entry in the registry contains a CEE token and the server
+EncryptedExtensions message included the extension. Otherwise, the client MUST
+NOT send the extension. If a server receives an extension which does not meet
+this criteria, it MUST abort the handshake with an `unsupported_extension`
+alert.
+
+Future extensions MAY use the client EncryptedExtensions message by including
+the CEE token in the TLS 1.3 registry. The above rules ensure clients will not
+send EncryptedExtensions messages to older servers, but will send
+EncryptedExtensions when some negotiated extension uses it.
+
+\[\[TODO: Section 4.6.1 of RFC8446 allows the server to predict the client
+Finished flight and send a ticket early. This is still possible with 0-RTT
+handshakes here because we omit rather than repeat the redudant ALPS
+information, but, in the general extension case, client EncryptedExtensions
+breaks this. Extension order is unpredictable. We should resolve this conflict,
+either by dropping that feature or removing flexibility here.\]\]
 
 ## 0-RTT Handshakes
 
@@ -206,10 +228,13 @@ not have application settings.
 
 If the server accepts early data, the server SHALL NOT send an
 `application_settings` extension, and thus the client SHALL NOT send a
-ClientApplicationSettings message. Instead, the connection implicitly uses the
-PSK's application settings, if any. If the server rejects early data,
-application settings are negotiated independently of the PSK, as if early data
-were not offered.
+`application_settings` extension in its EncryptedExtensions message. Unless the
+server has sent some other extension which uses client EncryptedExtensions, the
+client SHALL NOT send an EncryptedExtensions message. Instead, the connection
+implicitly uses the PSK's application settings, if any.
+
+If the server rejects early data, application settings are negotiated
+independently of the PSK, as if early data were not offered.
 
 If the client wishes to send different client settings for the connection,
 it MUST NOT offer 0-RTT.  Conversely, if the server wishes to use send different
@@ -235,10 +260,7 @@ carried over from the previous connection.
 
 IANA will update the "TLS ExtensionType Values" registry to include
 `application_settings` with the value of TBD; the list of messages in which
-this extension may appear is `CH, EE`.
-
-IANA will also update the "TLS HandshakeType" registry to include
-`client_application_settings` message with value TBD, and "DTLS-OK" set to "Y".
+this extension may appear is `CH, EE, CEE`.
 
 
 --- back
