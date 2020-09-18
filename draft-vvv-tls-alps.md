@@ -110,19 +110,6 @@ support, and the server MUST NOT reply with ALPS unless it is also negotiating
 ALPN.  The ALPS payload is protocol-dependent, and as such it MUST be specified
 with respect to a selected ALPN.
 
-For application protocols that support 0-RTT data, both the client and the
-server have to remember the settings provided by the both sides during the
-original connection.  If the client sends 0-RTT data and the server accepts it,
-the ALPS values SHALL be the same values as were during the original
-connection.  In all other cases (including session resumption that does not
-result in server accepting early data), new ALPS values SHALL be negotiated.
-
-If the client wishes to send different client settings for the 0-RTT session,
-it MUST NOT offer 0-RTT.  Conversely, if the server would send different server
-settings, it MUST reject 0-RTT.  Note that the ALPN itself is similarly
-required to match the one in the original connection, thus the settings
-only need to be remembered or checked for a single application protocol.
-
 # Wire protocol
 
 ALPS is only supported in TLS version 1.3 or later, as the earlier versions do
@@ -207,10 +194,32 @@ context as defined in Section 4.4 of {{!RFC8446}}.  In addition, for
 Post-Handshake Handshake Context, it SHALL be appended after the client
 Finished message.
 
-When performing session resumption with 0-RTT data, the settings are carried
-over from the original connection.  The server SHALL send an empty
-`application_settings` extension if it accepts 0-RTT, and the client SHALL NOT
-send a ClientApplicationSettings message.
+## 0-RTT Handshakes
+
+ALPS ensures settings are available before reading and writing application data,
+so handshakes which negotiate early data instead use application settings from
+the PSK. To use early data with a PSK, the TLS implementation MUST associate both
+client and server application settings, if any, with the PSK. For a resumption
+PSK, these values are determined from the original connection. For an external
+PSK, this values should be configured with it. Existing PSKs are considered to
+not have application settings.
+
+If the server accepts early data, the server SHALL NOT send an
+`application_settings` extension, and thus the client SHALL NOT send a
+ClientApplicationSettings message. Instead, the connection implicitly uses the
+PSK's application settings, if any. If the server rejects early data,
+application settings are negotiated independently of the PSK, as if early data
+were not offered.
+
+If the client wishes to send different client settings for the connection,
+it MUST NOT offer 0-RTT.  Conversely, if the server wishes to use send different
+server settings, it MUST reject 0-RTT.  Note that the ALPN itself is similarly
+required to match the one in the original connection, thus the settings
+only need to be remembered or checked for a single application protocol.
+Implementations are RECOMMENDED to first determine the desired application
+protocol and settings independent of early data, and then decline to offer or
+accept early data if the values do not match the PSK. This preserves any ALPN
+and ALPS configuration specified by the calling application.
 
 # Security Considerations
 
