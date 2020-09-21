@@ -14,6 +14,11 @@ pi: [toc, sortrefs, symrefs]
 
 author:
  -
+    ins: D. Benjamin
+    name: David Benjamin
+    organization: Google
+    email: davidben@google.com
+ -
     ins: V. Vasiliev
     name: Victor Vasiliev
     organization: Google
@@ -268,5 +273,5 @@ this extension may appear is `CH, EE, CEE`.
 # Acknowledgments
 {:numbered="false"}
 
-This document has benefited from contributions and suggestions from David
-Benjamin, Nick Harper, David Schinazi, Renjie Tang and many others.
+This document has benefited from contributions and suggestions from Nick
+Harper, David Schinazi, Renjie Tang and many others.
