@@ -171,19 +171,24 @@ for the situations when the client offers multiple ALPN values but only supports
 ALPS in some of them.
 
 If the server chooses an ALPN value for which the client has offered ALPS
-support, the server MAY negotiate ALPS by sending an `application_settings`
-extension in its EncryptedExtensions message.  The value of the `extension_data`
-field in that case SHALL be an opaque blob containing the server settings as
-specified by the application protocol.
+support, the server MAY additionally negotiate ALPS in this connection and
+determine a server settings value. This is an opaque blob as specified by the
+ALPN protocol. If not accepting early data (see {{early-data}}), the server then
+sends an `application_settings` extension in its EncryptedExtensions message.
+The value of the `extension_data` field in that case SHALL the server settings
+value.
 
 If the client receives an EncryptedExtensions message containing an
-`application_settings` extension from the server, it MUST send an
-EncryptedExtensions message (see {{encrypted-extensions}}) containing an
-`application_extensions` extension. The value of the `extension_data` in this
-extension SHALL be an opaque blob containing the client settings as specified by
-the application protocol. A server which negotiates ALPS MUST abort the
-handshake with a `missing_extension` alert if the client's EncryptedExtensions
-is missing this extension.
+`application_settings` extension from the server, it first checks that ALPN was
+negotiated and that the selected ALPN protocol was one of the ones advertised in
+ApplicationSettingsSupport. If not, it MUST abort the connection with an
+"illegal_parameter" alert. Otherwise, it MUST send an EncryptedExtensions
+message (see {{encrypted-extensions}}) containing an `application_extensions`
+extension. The value of the `extension_data` in this extension SHALL be an
+opaque blob containing the client settings as specified by the application
+protocol. A server which negotiates ALPS MUST abort the handshake with a
+`missing_extension` alert if the client's EncryptedExtensions is missing this
+extension.
 
 ## Client Encrypted Extensions {#encrypted-extensions}
 
@@ -221,15 +226,36 @@ information, but, in the general extension case, client EncryptedExtensions
 breaks this. Extension order is unpredictable. We should resolve this conflict,
 either by dropping that feature or removing flexibility here.\]\]
 
-## 0-RTT Handshakes
+## 0-RTT Handshakes {#early-data}
 
 ALPS ensures settings are available before reading and writing application data,
 so handshakes which negotiate early data instead use application settings from
-the PSK. To use early data with a PSK, the TLS implementation MUST associate both
-client and server application settings, if any, with the PSK. For a resumption
-PSK, these values are determined from the original connection. For an external
-PSK, this values should be configured with it. Existing PSKs are considered to
-not have application settings.
+the PSK. To use early data with a PSK, the TLS implementation MUST associate
+both client and server application settings, if any, with the PSK. For a
+resumption PSK, these values are determined from the original connection. For an
+external PSK, this values should be configured with it. Existing PSKs are
+considered to not have application settings.
+
+When sending a ClientHello, clients MUST NOT offer early data with a PSK that
+has application settings if the PSK's client application settings are different
+from those the client would send for the PSK's ALPN protocol. If the PSK does
+not have application settings, the client MAY offer early data with the PSK
+independent of its ALPS configuration.
+
+When processing a ClientHello, in addition to the checks specified by Section
+4.2.10 of {{RFC8446}}, the server MUST verify the following before accepting
+early data:
+
+- If the server did not negotiate ALPS for the connection, the PSK does not
+- have
+  application settings.
+
+- If the server did negotiate ALPS for the connection, the PSK has application
+  settings and the PSK's server settings value matches the value selected by the
+  server.
+
+If either check fails, the server MUST NOT accept early data. It MAY continue to
+negotiate the PSK.
 
 If the server accepts early data, the server SHALL NOT send an
 `application_settings` extension, and thus the client SHALL NOT send a
@@ -241,15 +267,9 @@ implicitly uses the PSK's application settings, if any.
 If the server rejects early data, application settings are negotiated
 independently of the PSK, as if early data were not offered.
 
-If the client wishes to send different client settings for the connection,
-it MUST NOT offer 0-RTT.  Conversely, if the server wishes to use send different
-server settings, it MUST reject 0-RTT.  Note that the ALPN itself is similarly
-required to match the one in the original connection, thus the settings
-only need to be remembered or checked for a single application protocol.
-Implementations are RECOMMENDED to first determine the desired application
-protocol and settings independent of early data, and then decline to offer or
-accept early data if the values do not match the PSK. This preserves any ALPN
-and ALPS configuration specified by the calling application.
+The checks in this section are analogous to the requirement that ALPN is
+preserved across early data. They ensure that early data does not change the
+result of the ALPN or ALPS negotiation.
 
 # Security Considerations
 
