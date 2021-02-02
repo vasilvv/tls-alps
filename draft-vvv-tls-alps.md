@@ -183,7 +183,7 @@ If the client receives an EncryptedExtensions message containing an
 negotiated and that the selected ALPN protocol was one of the ones advertised in
 ApplicationSettingsSupport. If not, it MUST abort the connection with an
 "illegal_parameter" alert. Otherwise, it MUST send an EncryptedExtensions
-message (see {{encrypted-extensions}}) containing an `application_extensions`
+message (see {{encrypted-extensions}}) containing an `application_settings`
 extension. The value of the `extension_data` in this extension SHALL be an
 opaque blob containing the client settings as specified by the application
 protocol. A server which negotiates ALPS MUST abort the handshake with a
