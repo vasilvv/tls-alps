@@ -5,7 +5,7 @@
 TLS Working Group                                            D. Benjamin
 Internet-Draft                                               V. Vasiliev
 Intended status: Standards Track                                  Google
-Expires: 26 July 2021                                    22 January 2021
+Expires: 6 August 2021                                   2 February 2021
 
 
            TLS Application-Layer Protocol Settings Extension
@@ -47,7 +47,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 26 July 2021.
+   This Internet-Draft will expire on 6 August 2021.
 
 Copyright Notice
 
@@ -239,7 +239,7 @@ Table of Contents
    of the ones advertised in ApplicationSettingsSupport.  If not, it
    MUST abort the connection with an "illegal_parameter" alert.
    Otherwise, it MUST send an EncryptedExtensions message (see
-   Section 4.1) containing an "application_extensions" extension.  The
+   Section 4.1) containing an "application_settings" extension.  The
    value of the "extension_data" in this extension SHALL be an opaque
    blob containing the client settings as specified by the application
    protocol.  A server which negotiates ALPS MUST abort the handshake
