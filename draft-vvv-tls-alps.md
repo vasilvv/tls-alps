@@ -247,8 +247,7 @@ When processing a ClientHello, in addition to the checks specified by Section
 early data:
 
 - If the server did not negotiate ALPS for the connection, the PSK does not
-- have
-  application settings.
+  have application settings.
 
 - If the server did negotiate ALPS for the connection, the PSK has application
   settings and the PSK's server settings value matches the value selected by the
