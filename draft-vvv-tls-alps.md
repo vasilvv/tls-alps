@@ -271,6 +271,37 @@ The checks in this section are analogous to the requirement that ALPN is
 preserved across early data. They ensure that early data does not change the
 result of the ALPN or ALPS negotiation.
 
+# Using ALPS in an Application Protocol
+
+Protocols using ALPS MUST define an application profile describing how the
+negotiated settings values are used in the protocol. Absent such a profile,
+client and server applications MUST NOT configure their TLS implementations to
+negotiate ALPS with the corresponding ALPN value. The profile MUST define the
+syntaxes of the client and server protocol settings values and how they are
+processes.
+
+Protocols MAY mandate the use of ALPS when negotiated over TLS. This may be
+appropriate for new protocols that can depend on ALPS. Applications
+implementing the protocol would then check that ALPS was negotiated and, if
+not, terminate the connection.
+
+Alternatively, protocols MAY make the use of ALPS optional. This may be
+appropriate for existing protocols, where there is already a deployment of
+non-ALPS clients or servers. ALPS would then be an extension to the existing
+protocol, and the application profile would define the protocol changes when
+negotiated. Note that, for any given connection, ALPS will be consistently
+negotiated or not negotiated on both the client and server. This means
+adjusting protocol behavior based on ALPS is unambiguous.
+
+As described in {{early-data}}, early data does not change the result of the
+ALPS negotiation, so protocols that use TLS early data MAY change client and
+server ALPS preferences across connections. However, when either value changes,
+early data is rejected. Thus protocols using both ALPS and early data SHOULD
+ensure the client and server preferences change infrequently. For example, the
+set of HTTP/2 extensions {{?RFC7540}} implemented by a server only changes when
+new features are deployed. However, mechanisms like GREASE {{?RFC8701}} that
+randomize values per connection would not perform well.
+
 # Security Considerations
 
 ALPS is protected using the handshake keys, which are the secret keys derived
