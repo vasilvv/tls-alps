@@ -278,7 +278,7 @@ negotiated settings values are used in the protocol. Absent such a profile,
 client and server applications MUST NOT configure their TLS implementations to
 negotiate ALPS with the corresponding ALPN value. The profile MUST define the
 syntaxes of the client and server protocol settings values and how they are
-processes.
+processed.
 
 Protocols MAY mandate the use of ALPS when negotiated over TLS. This may be
 appropriate for new protocols that can depend on ALPS. Applications
@@ -299,8 +299,9 @@ server ALPS preferences across connections. However, when either value changes,
 early data is rejected. Thus protocols using both ALPS and early data SHOULD
 ensure the client and server preferences change infrequently. For example, the
 set of HTTP/2 extensions {{?RFC7540}} implemented by a server only changes when
-new features are deployed. However, mechanisms like GREASE {{?RFC8701}} that
-randomize values per connection would not perform well.
+new features are deployed. However, including different reserved setting
+identifiers (see Section 7.2.4.1 of {{?I-D.ietf-quic-http}}) in each connection
+would not perform well.
 
 # Security Considerations
 
