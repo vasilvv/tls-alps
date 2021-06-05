@@ -90,9 +90,9 @@ ALPS is *not* a negotiation mechanism: there is no notion of rejecting peer's
 settings, and the settings are not responses to one another.  Nevertheless, it
 is possible for parties to coordinate behavior by, for instance, requiring a
 certain parameter to be present in both client and server settings.  This makes
-ALPS mechanism similar to QUIC transport parameters
-{{?I-D.ietf-quic-transport}} or HTTP/2 SETTINGS frame {{?RFC7540}}, but puts it
-in contrast to similar mechanisms in TLS.
+ALPS mechanism similar to QUIC transport parameters {{?RFC9000}} or HTTP/2
+SETTINGS frame {{?RFC7540}}, but puts it in contrast to similar mechanisms in
+TLS.
 
 Settings are exchanged as a part of the TLS handshake that is encrypted with the
 handshake keys.  When the server settings are sent, the identity of the client
@@ -197,8 +197,8 @@ format and HandshakeType code point match the server EncryptedExtensions
 message. When sent, it is encrypted with handshake traffic keys and sent by the
 client after receiving the server Finished message and before the client sends
 the Certificate, CertificateVerify (if any), and Finished messages. It SHALL be
-appended to the Client Handshake Context, as defined Section 4.4 of
-{{!RFC8446}}. It additionally SHALL be inserted after the server Finished in the
+appended to the Client Handshake Context, as defined in {{Section 4.4 of
+!RFC8446}}. It additionally SHALL be inserted after the server Finished in the
 Post-Handshake Handshake Context.
 
 The client MUST send the EncryptedExtensions message if any extension sent in
@@ -242,8 +242,8 @@ from those the client would send for the PSK's ALPN protocol. If the PSK does
 not have application settings, the client MAY offer early data with the PSK
 independent of its ALPS configuration.
 
-When processing a ClientHello, in addition to the checks specified by Section
-4.2.10 of {{RFC8446}}, the server MUST verify the following before accepting
+When processing a ClientHello, in addition to the checks specified by {{Section
+4.2.10 of RFC8446}}, the server MUST verify the following before accepting
 early data:
 
 - If the server did not negotiate ALPS for the connection, the PSK does not
@@ -299,7 +299,7 @@ early data is rejected. Thus protocols using both ALPS and early data SHOULD
 ensure the client and server preferences change infrequently. For example, the
 set of HTTP/2 extensions {{?RFC7540}} implemented by a server only changes when
 new features are deployed. However, including different reserved setting
-identifiers (see Section 7.2.4.1 of {{?I-D.ietf-quic-http}}) in each connection
+identifiers (see {{Section 7.2.4.1 of ?I-D.ietf-quic-http}}) in each connection
 would not perform well.
 
 # Security Considerations
