@@ -337,15 +337,6 @@ in which this extension may appear is `CH, EE, CEE`.
 The ExtensionType value 17613 (or 0x44cd) is selected to replace the earlier
 experimental value 17513 (or 0x4469).
 
-In order to facilitate migration from the earlier experimental value, the server
-SHOULD support both code points 17613 (or 0x44cd) and 17513 (or 0x4469) during
-the transition period. Once the server receives a codepoint in the ClientHello
-message, the server MUST use the same codepoint to transmit server's settings.
-After completing the transition, the server SHOULD discontinue support for the
-old code point 17513 (0x4469). This ensures a smooth and interoperable migration
-to the newly assigned ExtensionType value, minimizing potential disruptions to
-the existing deployments.
-
 
 --- back
 
