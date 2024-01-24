@@ -163,8 +163,19 @@ exchange is performed in three steps:
 {: #alps-full title="ALPS exchange in a full TLS handshake"}
 
 A TLS client can enable ALPS by specifying an `application_settings` extension
-in the ClientHello message. The value of the `extension_data` field for this
-extension SHALL be a ApplicationSettingsSupport struct:
+in the ClientHello message.
+
+~~~
+   enum {
+      application_settings(0x44cd), (65535)
+   } ExtensionType;
+~~~
+
+The `application_settings` ExtensionType value 17613 (or 0x44cd) is random
+selected for early experimental deployments. The following code points:
+17513 (or 0x4469) and 17613 (or 0x44cd) have been using for early experimental
+deployments. The value of the `extension_data` field for this extension SHALL be
+a ApplicationSettingsSupport struct:
 
         struct {
             ProtocolName supported_protocols<2..2^16-1>;
@@ -320,8 +331,20 @@ carried over from the previous connection.
 # IANA Considerations
 
 IANA will update the "TLS ExtensionType Values" registry to include
-`application_settings` with the value of TBD; the list of messages in which
-this extension may appear is `CH, EE, CEE`.
+`application_settings` with the value of 17613 (or 0x44cd); the list of messages
+in which this extension may appear is `CH, EE, CEE`.
+
+The ExtensionType value 17613 (or 0x44cd) is selected to replace the earlier
+experimental value 17513 (or 0x4469).
+
+In order to facilitate migration from the earlier experimental value, the server
+SHOULD support both code points 17613 (or 0x44cd) and 17513 (or 0x4469) during
+the transition period. Once the server receives a codepoint in the ClientHello
+message, the server MUST use the same codepoint to transmit server's settings.
+After completing the transition, the server SHOULD discontinue support for the
+old code point 17513 (0x4469). This ensures a smooth and interoperable migration
+to the newly assigned ExtensionType value, minimizing potential disruptions to
+the existing deployments.
 
 
 --- back
