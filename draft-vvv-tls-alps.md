@@ -163,8 +163,11 @@ exchange is performed in three steps:
 {: #alps-full title="ALPS exchange in a full TLS handshake"}
 
 A TLS client can enable ALPS by specifying an `application_settings` extension
-in the ClientHello message. The value of the `extension_data` field for this
-extension SHALL be a ApplicationSettingsSupport struct:
+in the ClientHello message. An early experimental deployment of this protocol
+used the value 17513 for `application_settings`. It was then replaced with an
+experimental deployment which used the value 17613. The value of the
+`extension_data` field for this extension SHALL be a ApplicationSettingsSupport
+struct:
 
         struct {
             ProtocolName supported_protocols<2..2^16-1>;
