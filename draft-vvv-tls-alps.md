@@ -163,19 +163,11 @@ exchange is performed in three steps:
 {: #alps-full title="ALPS exchange in a full TLS handshake"}
 
 A TLS client can enable ALPS by specifying an `application_settings` extension
-in the ClientHello message.
-
-~~~
-   enum {
-      application_settings(0x44cd), (65535)
-   } ExtensionType;
-~~~
-
-The `application_settings` ExtensionType value 17613 (or 0x44cd) is random
-selected for early experimental deployments. The following code points:
-17513 (or 0x4469) and 17613 (or 0x44cd) have been using for early experimental
-deployments. The value of the `extension_data` field for this extension SHALL be
-a ApplicationSettingsSupport struct:
+in the ClientHello message. An early experimental deployment of this protocol
+used the value 17513 for `application_settings`. It was then replaced with an
+experimental deployment which used the value 17613. The value of the
+`extension_data` field for this extension SHALL be a ApplicationSettingsSupport
+struct:
 
         struct {
             ProtocolName supported_protocols<2..2^16-1>;
@@ -331,11 +323,8 @@ carried over from the previous connection.
 # IANA Considerations
 
 IANA will update the "TLS ExtensionType Values" registry to include
-`application_settings` with the value of 17613 (or 0x44cd); the list of messages
-in which this extension may appear is `CH, EE, CEE`.
-
-The ExtensionType value 17613 (or 0x44cd) is selected to replace the earlier
-experimental value 17513 (or 0x4469).
+`application_settings` with the value of TBD; the list of messages in which
+this extension may appear is `CH, EE, CEE`.
 
 
 --- back
