@@ -5,9 +5,9 @@
 TLS Working Group                                            D. Benjamin
 Internet-Draft                                               V. Vasiliev
 Intended status: Standards Track                                  Google
-Expires: 7 December 2023                                          V. Tan
+Expires: 5 August 2024                                            V. Tan
                                                               Google LLC
-                                                             5 June 2023
+                                                         2 February 2024
 
 
            TLS Application-Layer Protocol Settings Extension
@@ -49,11 +49,11 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 7 December 2023.
+   This Internet-Draft will expire on 5 August 2024.
 
 Copyright Notice
 
-   Copyright (c) 2023 IETF Trust and the persons identified as the
+   Copyright (c) 2024 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -215,7 +215,10 @@ Table of Contents
               Figure 1: ALPS exchange in a full TLS handshake
 
    A TLS client can enable ALPS by specifying an application_settings
-   extension in the ClientHello message.  The value of the
+   extension in the ClientHello message.  An early experimental
+   deployment of this protocol used the value 17513 for
+   application_settings.  It was then replaced with an experimental
+   deployment which used the value 17613.  The value of the
    extension_data field for this extension SHALL be a
    ApplicationSettingsSupport struct:
 
